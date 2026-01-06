@@ -3,11 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Role } from './../../../common/rbac/roles.enum';
 
+
 export interface JwtPayload {
   sub: string;
   tenantId: string;
   phoneNumber: string;
-  roles: Role[]; // ✅ plural
+  roles: Role; // ✅ plural
 }
 
 @Injectable()
@@ -37,11 +38,9 @@ async validate(payload: {
   role: Role;
 }) {
   const { sub, tenantId, phoneNumber, role } = payload;
-
   if (!sub || !tenantId || !phoneNumber || !role) {
     throw new UnauthorizedException('Invalid JWT payload');
   }
-
   return {
     userId: sub,
     tenantId,

@@ -12,18 +12,16 @@ import { AuthModule } from './modules/auth/auth.module';
     providers: [
     {
       provide: APP_GUARD,
+      useClass: TenantGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: TenantGuard,
-    },
-
-
   ],
 })
 export class AppModule {}
