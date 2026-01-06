@@ -1,0 +1,37 @@
+services:
+  api:
+    image: node:20-alpine
+    container_name: homecare_api_dev
+    working_dir: /app
+    command: sh -c "npm install && npm run start:dev"
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    depends_on:
+      - postgres
+      - redis
+
+
+  postgres:
+    image: postgres:16
+    container_name: homecare_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: calpine*123
+      POSTGRES_DB: care_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: homecare_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
