@@ -28,7 +28,7 @@ export class OtpService {
     if (channel === 'SMS') {
       await this.exotelProvider.sendOtp(phoneNumber, otp);
     } else {
-      await this.whatsappProvider.sendOtp(phoneNumber, otp);
+      await this.whatsappProvider.sendWhatsApp(phoneNumber, otp);
     }
   }
 
