@@ -37,3 +37,7 @@ npm run build
 npx typeorm migration:run -d dist/infrastructure/database/datasource.js
 
 This is used to migrate care_domains with the main domain.
+
+
+
+
