@@ -11,10 +11,15 @@ import { WhatsappOtpProvider } from './../otp/provider/whatsapp.provider';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../users/user.entity';
+import { UserRole } from '../users/user-role.entity';
 
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([User, UserRole]), // ✅ THIS IS THE FIX
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,

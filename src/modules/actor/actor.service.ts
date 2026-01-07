@@ -1,31 +1,17 @@
-// src/modules/actor/actor.service.ts
-import { Injectable } from '@nestjs/common';
-import { ActorRepository } from './actor.repository';
-import { CreateActorDto } from './dto/create-actor.dto';
-import { CentralAssignmentService } from '../central-assignment/central-assignment.service';
-import { AuditService } from '../audit/audit.service';
+
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class ActorService {
-  constructor(
-    private readonly repo: ActorRepository,
-    private readonly centralService: CentralAssignmentService,
-    private readonly audit: AuditService,
-  ) {}
+  private readonly logger = new Logger(ActorService.name);
 
-  async create(dto: CreateActorDto) {
-    const actor = await this.repo.createActor(dto);
-
-    if (actor.type === 'PROVIDER') {
-      await this.centralService.assignProvider(actor.id, actor.tenantId);
+  async createActor(payload: any) {
+    try {
+      this.logger.log('Creating actor');
+      return { status: 'CREATED', payload };
+    } catch (error) {
+      this.logger.error('Failed to create actor', error);
+      throw error;
     }
-
-    await this.audit.log({
-      action: 'ACTOR_CREATED',
-      entityId: actor.id,
-      performedBy: 'SYSTEM',
-    });
-
-    return actor;
   }
 }

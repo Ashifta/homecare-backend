@@ -6,12 +6,20 @@ import { AppDataSource } from '../../infrastructure/database/datasource';
 import { UserRole } from '../users/user-role.entity';
 import { User } from '../users/user.entity';
 import { Role } from '../../common/rbac/roles.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
+        @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+
+    @InjectRepository(UserRole)
+    private readonly userRoleRepo: Repository<UserRole>,
   ) {}
 
 
@@ -29,31 +37,18 @@ async verifyOtp(
   otp: string,
   channel: string,
 ) {
-  console.log( "----11--------------------" )
-  // 1️⃣ Verify OTP
   await this.otpService.verifyOtp(tenantId, phoneNumber, otp);
- console.log( tenantId )
-  console.log( phoneNumber )
-    console.log( otp )
-  console.log( "------------------------" )
-  const userRepo = AppDataSource.getRepository(User);
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
 
-  // 2️⃣ Find user
-  let user = await userRepo.findOne({
+  let user = await this.userRepo.findOne({
     where: { tenantId, phoneNumber },
   });
 
-  // 3️⃣ First login → create user + default PATIENT role
   if (!user) {
-    user = userRepo.create({
-      tenantId,
-      phoneNumber,
-    });
-    await userRepo.save(user);
+    user = this.userRepo.create({ tenantId, phoneNumber });
+    await this.userRepo.save(user);
 
-    await userRoleRepo.save(
-      userRoleRepo.create({
+    await this.userRoleRepo.save(
+      this.userRoleRepo.create({
         tenantId,
         userId: user.id,
         role: Role.PATIENT,
@@ -62,8 +57,7 @@ async verifyOtp(
     );
   }
 
-  // 4️⃣ Load ACTIVE role (SINGLE)
-  const userRole = await userRoleRepo.findOne({
+  const userRole = await this.userRoleRepo.findOne({
     where: {
       tenantId,
       userId: user.id,
@@ -75,32 +69,21 @@ async verifyOtp(
     throw new UnauthorizedException('User has no active role');
   }
 
-  const role = userRole.role as Role;
-
-  // 5️⃣ Enforce single-device login
   const sessionKey = `session:${tenantId}:${phoneNumber}`;
-  const existingchannel = await redisClient.get(sessionKey);
+  const existingChannel = await redisClient.get(sessionKey);
 
-  if (existingchannel && existingchannel !== channel) {
-    throw new UnauthorizedException(
-      'User already logged in on another device',
-    );
+  if (existingChannel && existingChannel !== channel) {
+    throw new UnauthorizedException('User already logged in on another device');
   }
 
-  await redisClient.set(
-    sessionKey,
-    channel,
-    'EX',
-    60 * 60 * 4, // 4 hours
-  );
+  await redisClient.set(sessionKey, channel, 'EX', 60 * 60 * 4);
 
-  // 6️⃣ Issue JWT (SINGLE ROLE)
   return {
     accessToken: this.jwtService.sign({
       sub: user.id,
       tenantId,
       phoneNumber,
-      role,        // ✅ SINGLE ROLE
+      role: userRole.role,
       channel,
     }),
   };

@@ -4,8 +4,8 @@
   "private": true,
   "description": "Generic Care Services Platform REST API",
   "scripts": {
-    "start": "node dist/main.js",
-    "start:dev": "nest start --watch",
+    "start": "nest start",
+    "start:dev": "nest start --watch --preserveWatchOutput",
     "build": "nest build"
   },
   "dependencies": {
