@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { TenantGuard } from './common/tenant/tenant.guard';
+import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
 import { RolesGuard } from './common/rbac/roles.guard';
 
@@ -62,8 +62,8 @@ import { InfrastructureModule } from './infrastructure/infrastructure.module';
   controllers: [AppController],
   providers: [
     {
-      provide: APP_GUARD,
-      useClass: TenantGuard,
+      provide: APP_INTERCEPTOR,
+      useClass: TenantInterceptor,
     },
     {
       provide: APP_GUARD,

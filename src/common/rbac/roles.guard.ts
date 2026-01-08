@@ -26,7 +26,7 @@ export class RolesGuard implements CanActivate {
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
-
+    console.log("no role");
     if (!requiredRoles || requiredRoles.length === 0) {
       this.logger.debug('No roles required for endpoint');
       return true;
@@ -39,7 +39,7 @@ export class RolesGuard implements CanActivate {
 
     if (!request._roleSet) {
       const roleRepo = AppDataSource.getRepository(UserRole);
-
+      console.log("appsource");
       const roles = await roleRepo.find({
         where: {
           tenantId: user.tenantId,
