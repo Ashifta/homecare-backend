@@ -1,30 +1,22 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Role } from '../../common/rbac/roles.enum';
 
 @Entity('user_roles')
-@Index(['tenantId', 'userId'])
-@Index(['tenantId', 'role'])
 export class UserRole {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Index()
+  @Column()
   tenantId!: string;
 
-  @Column({ type: 'uuid' })
+  @Index()
+  @Column()
   userId!: string;
 
-  @Column({ length: 64 })
-  role!: string; // PATIENT, CENTRAL_PHYSIO, ADMIN, etc.
+  @Column({ type: 'enum', enum: Role })
+  role!:Role;
 
   @Column({ default: true })
   isActive!: boolean;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt!: Date;
 }

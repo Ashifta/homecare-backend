@@ -35,7 +35,7 @@ export class AuthController {
   //fetch the role from DB based on userId and tenantId, if Doctor the pass
   //DB access is fast as we use indexing for userId and tenantId
   @UseGuards(JwtAuthGuard)
-  @Roles(Role.PATIENT)
+  @Roles(Role.RECEIVER)
   @Get('/me/pa')
   test(){
     return "Test";

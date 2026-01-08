@@ -2,45 +2,70 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LedgerEntry, LedgerEntryType } from './entities/ledger-entry.entity';
+import { LedgerEntry } from './ledger-entry.entity';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class LedgerService {
   constructor(
     @InjectRepository(LedgerEntry)
-    private readonly ledgerRepo: Repository<LedgerEntry>,
+    private readonly repo: Repository<LedgerEntry>,
   ) {}
 
-  async record(entry: {
-    tenantId: string;
-    walletId: string;
-    amount: string;
-    type: LedgerEntryType;
-    reason: string;
-    referenceType: string;
-    referenceId: string;
-  }) {
-    return this.ledgerRepo.save(this.ledgerRepo.create(entry));
+  async record(entry: Partial<LedgerEntry>) {
+    const e = this.repo.create(entry);
+    return this.repo.save(e);
   }
+  async sumByMonth(
+  walletId: string,
+  direction: 'CREDIT' | 'DEBIT',
+  year: number,
+  month: number,
+): Promise<number> {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0, 23, 59, 59);
 
-  async sumByMonth(walletId: string, type: LedgerEntryType, year: number, month: number) {
-    const r = await this.ledgerRepo.createQueryBuilder('l')
-      .select('SUM(l.amount)', 'total')
-      .where('l.walletId = :walletId', { walletId })
-      .andWhere('l.type = :type', { type })
-      .andWhere('EXTRACT(YEAR FROM l.createdAt) = :year', { year })
-      .andWhere('EXTRACT(MONTH FROM l.createdAt) = :month', { month })
-      .getRawOne();
-    return Number(r?.total || 0);
-  }
+  const qb = this.repo
+    .createQueryBuilder('l')
+    .select('SUM(l.amount)', 'total')
+    .where(
+      direction === 'CREDIT'
+        ? 'l.creditWalletId = :walletId'
+        : 'l.debitWalletId = :walletId',
+      { walletId },
+    )
+    .andWhere('l.createdAt BETWEEN :start AND :end', { start, end });
 
-  async sumByYear(walletId: string, year: number) {
-    const r = await this.ledgerRepo.createQueryBuilder('l')
-      .select('SUM(l.amount)', 'total')
-      .where('l.walletId = :walletId', { walletId })
-      .andWhere('l.type = :type', { type: LedgerEntryType.CREDIT })
-      .andWhere('EXTRACT(YEAR FROM l.createdAt) = :year', { year })
-      .getRawOne();
-    return Number(r?.total || 0);
-  }
+  const result = await qb.getRawOne<{ total: string }>();
+  return Number(result?.total ?? 0);
+}
+
+async sumByYear(
+  walletId: string,
+  year: number,
+): Promise<number> {
+  const start = new Date(year, 0, 1); // Jan 1
+  const end = new Date(year, 11, 31, 23, 59, 59); // Dec 31
+
+  const creditQb = this.repo
+    .createQueryBuilder('l')
+    .select('SUM(l.amount)', 'total')
+    .where('l.creditWalletId = :walletId', { walletId })
+    .andWhere('l.createdAt BETWEEN :start AND :end', { start, end });
+
+  const debitQb = this.repo
+    .createQueryBuilder('l')
+    .select('SUM(l.amount)', 'total')
+    .where('l.debitWalletId = :walletId', { walletId })
+    .andWhere('l.createdAt BETWEEN :start AND :end', { start, end });
+
+  const credit = await creditQb.getRawOne<{ total: string }>();
+  const debit = await debitQb.getRawOne<{ total: string }>();
+
+  return (
+    Number(credit?.total ?? 0) -
+    Number(debit?.total ?? 0)
+  );
+}
+
 }

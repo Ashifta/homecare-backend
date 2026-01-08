@@ -1,19 +1,15 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { Settlement } from './entities/settlement.entity';
-import { Payment } from '../payment/entities/payment.entity';
 import { LedgerModule } from '../ledger/ledger.module';
 
+import { Module, forwardRef } from '@nestjs/common';
+import { FundSourceModule } from '../fund-source/fund-source.module';
 import { SettlementService } from './settlement.service';
-import { SettlementBatchService } from './settlement.batch.service';
+import { AppointmentModule } from '../appointment/appointment.module';
+
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Settlement, Payment]),
-    LedgerModule,
-  ],
-  providers: [SettlementService, SettlementBatchService],
-  exports: [SettlementService, SettlementBatchService],
+  imports: [FundSourceModule, LedgerModule, forwardRef(() => AppointmentModule), // ✅
+],
+  providers: [SettlementService],
+  exports: [SettlementService],
 })
 export class SettlementModule {}

@@ -1,85 +1,72 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
-import { Settlement } from './entities/settlement.entity';
-import { Payment, PaymentStatus } from '../payment/entities/payment.entity';
+import { Injectable, NotFoundException, BadRequestException ,  Inject, forwardRef } from '@nestjs/common';
+import { FundSourceService } from '../fund-source/fund-source.service';
 import { LedgerService } from '../ledger/ledger.service';
-import { LedgerEntryType } from '../ledger/entities/ledger-entry.entity';
+import { AppointmentService } from '../appointment/appointment.service';
 
 @Injectable()
 export class SettlementService {
-  private readonly logger = new Logger(SettlementService.name);
-
   constructor(
+    private readonly fundSourceService: FundSourceService,
     private readonly ledgerService: LedgerService,
-
-    @InjectRepository(Settlement)
-    private readonly settlementRepo: Repository<Settlement>,
-
-    @InjectRepository(Payment)
-    private readonly paymentRepo: Repository<Payment>,
+    @Inject(forwardRef(() => AppointmentService))
+    private readonly appointmentService: AppointmentService,
   ) {}
 
-  /**
-   * Settle a single payment.
-   * SAFE, IDEMPOTENT, AUDITABLE.
-   */
-  async settlePayment(paymentId: string): Promise<void> {
-    const payment = await this.paymentRepo.findOne({
-      where: { id: paymentId },
-    });
-
-    if (!payment) {
-      throw new BadRequestException('Payment not found');
+    // 🔹 Batch / single entry point
+  async settlePayment(paymentId: string) {
+    // paymentId === appointmentId
+    const appointment = await this.appointmentService.getById(paymentId);
+    if (!appointment) {
+      throw new NotFoundException('Appointment not found for settlement');
     }
 
-    if (payment.status !== PaymentStatus.SUCCESS) {
-      throw new BadRequestException('Payment not eligible for settlement');
+    if (appointment.status !== 'COMPLETED') {
+      throw new BadRequestException('Appointment not completed');
     }
 
-    const alreadySettled = await this.settlementRepo.findOne({
-      where: {
-        tenantId: payment.tenantId,
-        paymentId: payment.id,
-      },
-    });
-
-    if (alreadySettled) {
-      this.logger.debug(`Payment ${payment.id} already settled`);
-      return;
-    }
-
-    // 1️⃣ Debit payer wallet
-    await this.ledgerService.record({
-      tenantId: payment.tenantId,
-      walletId: payment.payerWalletId,
-      amount: payment.amount,
-      type: LedgerEntryType.DEBIT,
-      reason: 'Session payment',
-      referenceType: 'PAYMENT',
-      referenceId: payment.id,
-    });
-
-    // 2️⃣ Credit payee wallet
-    await this.ledgerService.record({
-      tenantId: payment.tenantId,
-      walletId: payment.payeeWalletId,
-      amount: payment.amount,
-      type: LedgerEntryType.CREDIT,
-      reason: 'Session earnings',
-      referenceType: 'PAYMENT',
-      referenceId: payment.id,
-    });
-
-    // 3️⃣ Mark settlement
-    await this.settlementRepo.save(
-      this.settlementRepo.create({
-        tenantId: payment.tenantId,
-        paymentId: payment.id,
-      }),
+    return this.settle(
+      appointment.tenantId,
+      appointment.fundSourceId,
+      appointment.providerWalletId,
+      appointment.platformWalletId,
+      appointment.amount,
+      appointment.commission,
     );
+  }
 
-    this.logger.log(`Settled payment ${payment.id}`);
+
+  async settle(tenantId: string, fundSourceId: string, providerWalletId: string, platformWalletId: string, amount: number, commission: number) {
+    const fs = await this.fundSourceService.getById(fundSourceId);
+    if (!fs) throw new Error('FundSource not found');
+
+    
+// 🔹 Ledger entries
+await this.ledgerService.record({
+  tenantId,
+  debitWalletId: fs.walletId,
+  creditWalletId: providerWalletId,
+  amount: amount - commission,
+  referenceType: 'SETTLEMENT_PROVIDER',
+  referenceId: fundSourceId,
+});
+
+await this.ledgerService.record({
+  tenantId,
+  debitWalletId: fs.walletId,
+  creditWalletId: platformWalletId,
+  amount: commission,
+  referenceType: 'SETTLEMENT_PLATFORM',
+  referenceId: fundSourceId,
+});
+
+return {
+
+      debitWalletId: fs.walletId,
+      creditProviderWalletId: providerWalletId,
+      creditPlatformWalletId: platformWalletId,
+      amount,
+      commission,
+    };
   }
 }

@@ -51,7 +51,7 @@ async verifyOtp(
       this.userRoleRepo.create({
         tenantId,
         userId: user.id,
-        role: Role.PATIENT,
+        role: Role.RECEIVER,
         isActive: true,
       }),
     );

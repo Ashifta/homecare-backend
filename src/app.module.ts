@@ -1,3 +1,5 @@
+import { FundSourceModule } from './modules/fund-source/fund-source.module';
+import { SettlementModule } from './modules/settlement/settlement.module';
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,7 +24,7 @@ import { SlaModule } from './modules/sla/sla.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { LedgerModule } from './modules/ledger/ledger.module';
 import { PaymentModule } from './modules/payment/payment.module';
-import { SettlementModule } from './modules/settlement/settlement.module';
+
 import { PayoutModule } from './modules/payout/payout.module';
 import { ReportModule } from './modules/report/report.module';
 
@@ -32,6 +34,8 @@ import { InfrastructureModule } from './infrastructure/infrastructure.module';
 
 @Module({
   imports: [
+    FundSourceModule,
+    SettlementModule,
     // ✅ TypeORM runtime configuration (THIS FIXES YOUR ERROR)
     TypeOrmModule.forRoot({
       type: 'postgres',
