@@ -237,28 +237,4 @@ Push notifications for:
 
 ---
 
-## 📜 Disclaimer
 
-> Details shared at a high level. Proprietary and confidential information is respected.
-
----
-
-## 📌 Roadmap (Optional)
-
-* Mobile App (iOS / Android)
-* Advanced route optimization
-* AI-based provider matching
-* Offline session capture
-* Insurance API integrations
-
----
-
-If you want next, I can:
-
-* Add **architecture diagrams (Mermaid)**
-* Add **API docs section**
-* Add **screenshots / GIF placeholders**
-* Align README perfectly with your **CV & LinkedIn**
-* Generate **badges dynamically** (CI, coverage, etc.)
-
-Just say 👍
