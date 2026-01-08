@@ -1,12 +1,264 @@
-*REQUIREMENT*
-Platform is Generic, Each Recievers/Providers has its own free time slot( 8. AM to 6. PM ), option to have 1 hours session time. Eg: Junior Physio/Nurse/Patient its own time slot( available time solt need to be displayed between ( 8 AM to 6 PM ) with 1 hours each. can have option to multiple sessions.   each  Recievers and Providers should update their location all the time, based on that distance and time to reach can be calculated. Assume that provider is moving by vehicle. Algorithm should be there to find closest Receivers of Providers.  All appointments are performed by the authority of Senior Physio/Centralized Control/Monitoring Persons. Each Receiver/Provider should have option to update Outcome after the session, So Centralized Control Person Alerted. Option to close payment daily to  Recievers and Providers based on the session completion and outcome result. Central Person has option to transfer the payment by 9.00 PM to All the Receivers and Providers. After session completion payment window should prompt for UPI payment for  Receivers and Providers. Option to add Insurance/Thirdparty/Charity fund provider and keep that is seperate account, but central physio can be transfer fund from  Insurance/Thirdparty/charity account to the Recievers and Providers.  Option to Generate monthly and yearly payment balance sheet for salary slip and ITR ready. Option to generate transaction/Tax exception for Insurance/Thirdparty/Charity.   Recievers may be clinic, patient, any particular shop with available slots for sheduling with providers. Provider will be ServicePerson/Shop/Physio/Any with available slots for scheduling with recievers. Role can be REDIS/configure lookup before Nestjs start so that code will be generic, but before bootstrap, domain will be created. Recievers and Providers can create account with OTP(SMS/WHatsApp) any time. Based on the tanantID corresponding Cetralized Persons Dashboad will be updated. Outcome based Review will be updated based on Wep/App parameters can be configurable and ready before bootstrap for generic design. Configure to activate/deacivate timeslot availability of Reciever/Provider by admin role. Option to cancel appointment from Reciever and Provider's and Centralized Person, History of Booking and Cancelations should be available with reason.
 
-Option for Giving Offer letter and Termincation letter to Reciever and Provider and Centrralised Persons.
 
-Dash board of Cetralized person should have active Reciever and Provide's Todays and One week head availability, booking and Cancelation. Histoty of daily, Weekly Reveniw, Income report and yearly ITR ready. 
+---
 
-Push notifications if Appointment is scheduled, canceled, rescheduled and Payment Alert( Success, failure )
+# 🏥 Generic Service Scheduling & Care Platform
 
-Auditlog based on Createa/Update/Cancel Reciever and Provider and Create/Update/Cancel appintments.
+![Status](https://img.shields.io/badge/status-active-success)
+![Backend](https://img.shields.io/badge/backend-NestJS-red)
+![Database](https://img.shields.io/badge/database-PostgreSQL-blue)
+![Cache](https://img.shields.io/badge/cache-Redis-critical)
+![Container](https://img.shields.io/badge/container-Docker-blue)
+![Architecture](https://img.shields.io/badge/architecture-multi--tenant-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-Design should be role based.
+A **generic, multi-tenant, role-based service scheduling and care management platform** designed for healthcare and service domains such as **HomeCare, Physiotherapy, Clinics, Shops, and Field Service Providers**.
+
+The system is **domain-agnostic**, **configurable before bootstrap**, and built for **scalability, auditability, and financial compliance**.
+
+---
+
+## 🚀 Key Highlights
+
+* Generic & reusable platform architecture
+* Role-based scheduling with centralized governance
+* Real-time location tracking & proximity matching
+* Integrated payments with UPI & third-party funds
+* Multi-tenant dashboards & reporting
+* Config-driven design (Redis-based, pre-bootstrap)
+* Audit-ready & compliance-friendly
+
+---
+
+## 🧠 Core Roles
+
+| Role                                    | Description                                              |
+| --------------------------------------- | -------------------------------------------------------- |
+| **Receiver**                            | Patient, Clinic, Shop, or any entity receiving a service |
+| **Provider**                            | Physio, Nurse, Service Person, Shop, or Service Entity   |
+| **Centralized Control / Senior Physio** | Authority for approval, monitoring, settlement           |
+| **Admin**                               | Configuration, role control, slot activation             |
+
+---
+
+## ⏱️ Time Slot & Scheduling System
+
+* Configurable operating window
+  **Default:** `08:00 AM – 06:00 PM`
+* Default session duration: **1 hour**
+* Each **Receiver** and **Provider**:
+
+  * Maintains independent availability
+  * Supports multiple sessions per day
+* Dynamic slot generation & display
+* Slot availability can be:
+
+  * Activated / deactivated by **Admin**
+  * Cancelled by **Receiver**, **Provider**, or **Centralized Control**
+* Full booking & cancellation history with **mandatory reason tracking**
+
+---
+
+## 🛂 Appointment Governance
+
+* All appointments are governed by:
+
+  * **Senior Physio / Centralized Control**
+* Central authority can:
+
+  * Approve or override bookings
+  * Monitor conflicts
+  * Manage operational flow
+
+---
+
+## 📍 Location Tracking & Matching Algorithm
+
+* Receivers & Providers continuously update location
+* Assumption: Provider travels **by vehicle**
+* System calculates:
+
+  * Distance
+  * Estimated time to reach
+* Matching algorithm identifies:
+
+  * **Closest Provider ↔ Receiver**
+* Used during scheduling and optimization
+
+---
+
+## 🔐 Authentication & Multi-Tenancy
+
+* Account creation via **OTP**
+
+  * SMS
+  * WhatsApp
+* Fully **multi-tenant**
+
+  * Scoped by `tenantId`
+  * Central dashboards update dynamically per tenant
+
+---
+
+## 🧾 Outcome & Review System
+
+* After session completion:
+
+  * Receiver / Provider submits **Outcome**
+* Outcome triggers:
+
+  * Alerts to Centralized Control
+  * Outcome-based review updates
+* Review parameters:
+
+  * Configurable via Web / App
+  * Loaded **before NestJS bootstrap** for generic behavior
+
+---
+
+## 💳 Payment & Settlement Workflow
+
+### Session Payments
+
+* Post-session **UPI payment prompt**
+* Payment status tracked:
+
+  * Success
+  * Failure
+* Daily closing:
+
+  * Centralized Control closes daily payments
+* **By 09:00 PM**:
+
+  * Centralized settlement to all Receivers & Providers
+
+---
+
+### 🏦 Insurance / Third-Party / Charity Funds
+
+* Separate accounts for:
+
+  * Insurance
+  * Third-party sponsors
+  * Charity funds
+* Centralized Control can:
+
+  * Transfer funds to Receivers / Providers
+* Full traceability & audit logs maintained
+
+---
+
+## 📊 Financial Reports & Compliance
+
+* Daily / Weekly / Monthly revenue reports
+* Monthly & Yearly balance sheets
+* **Salary slips**
+* **ITR-ready reports**
+* Separate tax & exemption reports for:
+
+  * Insurance
+  * Third-party
+  * Charity transactions
+
+---
+
+## 📈 Dashboards
+
+### Centralized Control Dashboard
+
+* Active Receivers & Providers
+* Today + one-week availability view
+* Booking & cancellation overview
+* Revenue analytics:
+
+  * Daily
+  * Weekly
+  * Yearly
+* ITR-ready summaries
+
+---
+
+## 🔔 Notifications
+
+Push notifications for:
+
+* Appointment scheduled
+* Appointment cancelled
+* Appointment rescheduled
+* Payment success
+* Payment failure
+
+---
+
+## 🧾 Audit & Traceability
+
+* Immutable audit logs for:
+
+  * Create / Update / Delete Receiver
+  * Create / Update / Delete Provider
+  * Create / Update / Cancel Appointments
+* Tenant-scoped audit trails
+
+---
+
+## 🧩 Configuration & Architecture
+
+* Role definitions stored in **Redis**
+* Configuration loaded **before NestJS bootstrap**
+* Domain created dynamically per tenant
+* Enables:
+
+  * Generic design
+  * Domain reuse
+  * Zero hard-coding
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend:** NestJS
+* **Database:** PostgreSQL
+* **Cache / Config:** Redis
+* **Containerization:** Docker
+* **Gateway:** NGINX
+* **Auth:** OTP (SMS / WhatsApp)
+* **Payments:** UPI + Third-Party Providers
+
+---
+
+## 📐 Design Principles
+
+* Domain-agnostic
+* Role-driven
+* Multi-tenant by default
+* Config-first (pre-bootstrap)
+* Audit-ready & compliance-friendly
+* Scalable & extensible
+
+---
+
+## 📜 Disclaimer
+
+> Details shared at a high level. Proprietary and confidential information is respected.
+
+---
+
+## 📌 Roadmap (Optional)
+
+* Mobile App (iOS / Android)
+* Advanced route optimization
+* AI-based provider matching
+* Offline session capture
+* Insurance API integrations
+
+---
+
+If you want next, I can:
+
+* Add **architecture diagrams (Mermaid)**
+* Add **API docs section**
+* Add **screenshots / GIF placeholders**
+* Align README perfectly with your **CV & LinkedIn**
+* Generate **badges dynamically** (CI, coverage, etc.)
+
+Just say 👍
