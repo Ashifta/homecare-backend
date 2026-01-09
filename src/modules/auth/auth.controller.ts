@@ -45,40 +45,18 @@ export class AuthController {
    * Send OTP via SMS / WhatsApp
    * Tenant is mandatory and enforced by TenantGuard
    */
-@Public()
 @Post('send-otp')
-  async  sendOtp(
-    @Headers('x-tenant-id') tenantId: string,
-    @Body() dto: SendOtpDto): Promise<{ message: string; }> {
-   await this.authService.sendOtp(
-      tenantId,
-      dto.phoneNumber,
-      dto.channel,
-  );
-    return {
-    message: 'OTP sent successfully',
-  };
+@Public()
+async sendOtp(@Body() dto: SendOtpDto) {
+  return this.authService.sendOtp(dto.phoneNumber);
 }
 
-  /**
-   * Verify OTP and issue JWT
-   * Single-device enforcement handled in AuthService
-   */
-  @Public()
-  @Post('verify-otp')
-  async verifyOtp(
-    @Headers('x-tenant-id') tenantId: string,
-    @Body() dto: VerifyOtpDto,
-  ) {
-    if (!tenantId) {
-      throw new BadRequestException('X-Tenant-Id header missing');
-    }
-
-    return this.authService.verifyOtp(
-      tenantId,
-      dto.phoneNumber,
-      dto.otp,
-      dto.channel,
-    );
-  }
+@Post('verify-otp')
+@Public()
+async verifyOtp(@Body() dto: VerifyOtpDto) {
+  return this.authService.verifyOtp(
+    dto.phoneNumber,
+    dto.otp
+  );
+}
 }

@@ -1,0 +1,63 @@
+[33mcommit 96fb8a20c95a4f65caf7bb48728212189c9d8a21[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Thu Jan 8 20:34:28 2026 +0530
+
+    Added Generic Home care Platform framework
+
+[33mcommit bdbc6dcae40490b117d509c0e7109b52e39404ce[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Thu Jan 8 18:59:31 2026 +0530
+
+    Updated Interceptor for Tenant ID globalization
+
+[33mcommit 983cdac1748f80bf3a3e6b03761600ef51044d28[m
+Author: Ashif <ashiftaec@gmail.com>
+Date:   Thu Jan 8 08:23:43 2026 +0530
+
+    Update Readme.md
+    
+    Updated the Read Me
+
+[33mcommit 8b76a1f02fe73f277271963fae63dc25279bdb7d[m
+Author: Ashif <ashiftaec@gmail.com>
+Date:   Thu Jan 8 08:22:31 2026 +0530
+
+    Update Readme.md
+    
+    This is Requirement of HomeCare Platform
+
+[33mcommit d34451d1a975003dced8539ca10172b7080d8527[m
+Author: Ashif <ashiftaec@gmail.com>
+Date:   Thu Jan 8 08:19:25 2026 +0530
+
+    Update Readme.md
+
+[33mcommit 6584f87b2fd85a5646d96e01fe787cb4c784e8a4[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Wed Jan 7 23:03:22 2026 +0530
+
+    Integrated twilio whatsapp login
+
+[33mcommit 9353eb60c5b1e9420faae40a15b12580292ac23f[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Wed Jan 7 21:42:12 2026 +0530
+
+    Day 3 Backend updated
+
+[33mcommit 429a8a328e12c6e4586f39f6afb9ea25ef191936[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Wed Jan 7 09:28:35 2026 +0530
+
+    Day 3 Basic Entity and Backend Framework
+
+[33mcommit 2caae75ffee4dc35e3f35408d47f514bb1f00c80[m[33m ([m[1;33mtag: [m[1;33mv1.0.0[m[33m)[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Tue Jan 6 11:55:27 2026 +0530
+
+    DAY2 updated workflow of JWT, Role Guards
+
+[33mcommit cc3cffafeff6eccbad27af8ff3f3346ce357a250[m
+Author: ASHIF TA <ashiftaec@gmail.com>
+Date:   Tue Jan 6 09:18:35 2026 +0530
+
+    Day 2: OTP auth, JWT, tenant, role setup

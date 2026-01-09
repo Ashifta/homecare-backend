@@ -1,5 +1,5 @@
 // src/modules/central-assignment/entities/central-assignment.entity.ts
-import {
+import { Index, Unique, 
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity('central_assignments')
+@Index(['tenantId'])
 export class CentralAssignmentEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

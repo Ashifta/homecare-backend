@@ -1,17 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import {
-  Payment,
-  PaymentMethod,
-  PaymentStatus,
-} from './entities/payment.entity';
+import { Payment, PaymentMethod, PaymentStatus } from './entities/payment.entity';
+import { PaymentRepository } from './payment.repository';
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(Payment)
-    private readonly paymentRepo: Repository<Payment>,
+    private readonly paymentRepo: PaymentRepository,
   ) {}
 
   /**
@@ -19,7 +13,6 @@ export class PaymentService {
    * This does NOT move money.
    */
   async initiatePayment(payload: {
-    tenantId: string;
     appointmentId: string;
     payerWalletId: string;
     payeeWalletId: string;
@@ -28,7 +21,6 @@ export class PaymentService {
   }): Promise<Payment> {
     const existing = await this.paymentRepo.findOne({
       where: {
-        tenantId: payload.tenantId,
         appointmentId: payload.appointmentId,
       },
     });
@@ -39,8 +31,12 @@ export class PaymentService {
       );
     }
 
-    const payment = this.paymentRepo.create({
-      ...payload,
+    const payment = this.paymentRepo.createForTenant({
+      appointmentId: payload.appointmentId,
+      payerWalletId: payload.payerWalletId,
+      payeeWalletId: payload.payeeWalletId,
+      amount: payload.amount,
+      method: payload.method,
       status: PaymentStatus.INITIATED,
     });
 
@@ -66,7 +62,7 @@ export class PaymentService {
   }
 
   /**
-   * Read-only helpers
+   * Read-only helpers (tenant enforced automatically)
    */
   async findById(paymentId: string): Promise<Payment | null> {
     return this.paymentRepo.findOne({
@@ -74,10 +70,9 @@ export class PaymentService {
     });
   }
 
-  async findUnsettledSuccessPayments(tenantId: string): Promise<Payment[]> {
+  async findUnsettledSuccessPayments(): Promise<Payment[]> {
     return this.paymentRepo.find({
       where: {
-        tenantId,
         status: PaymentStatus.SUCCESS,
       },
     });

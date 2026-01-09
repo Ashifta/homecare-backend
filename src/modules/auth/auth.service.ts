@@ -1,50 +1,94 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { redisClient } from './../../infrastructure/redis/redis.provider';
-import { OtpService } from './../otp/otp.service';
-import { AppDataSource } from '../../infrastructure/database/datasource';
-import { UserRole } from '../users/user-role.entity';
-import { User } from '../users/user.entity';
-import { Role } from '../../common/rbac/roles.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { redisClient } from './../../infrastructure/redis/redis.provider';
+import { OtpService } from './../otp/otp.service';
+import { Role } from '../../common/rbac/roles.enum';
+import { getTenantId } from 'src/common/tenant/tenant.helper';
+
+import { User } from '../users/user.entity';
+import { UserRole } from '../users/user-role.entity';
+import { UserRepository } from './../../modules/users/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
-        @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
 
+    // ✅ tenant-aware repository
+    private readonly userRepo: UserRepository,
+
+    // UserRole can stay as plain Repository
     @InjectRepository(UserRole)
     private readonly userRoleRepo: Repository<UserRole>,
   ) {}
 
+async sendOtp(phoneNumber: string) {
+  const tenantId = getTenantId();
 
-  async sendOtp(
-    tenantId: string,
-    phoneNumber: string,
-    channel: 'SMS' | 'WHATSAPP',
-  ) {
-    await this.otpService.sendOtp(tenantId, phoneNumber, channel);
+  try {
+    // 1️⃣ Try WhatsApp first
+    await this.otpService.sendOtp(
+      tenantId,
+      phoneNumber,
+      'WHATSAPP',
+    );
+
+    return {
+      success: true,
+      channel: 'WHATSAPP',
+      message: 'OTP sent via WhatsApp',
+    };
+  } catch (err) {
+    // 2️⃣ Fallback to SMS
+    await this.otpService.sendOtp(
+      tenantId,
+      phoneNumber,
+      'SMS',
+    );
+
+    return {
+      success: true,
+      channel: 'SMS',
+      message: 'OTP sent via SMS',
+    };
   }
+}
 
-async verifyOtp(
-  tenantId: string,
+
+  async verifyOtp(
   phoneNumber: string,
   otp: string,
-  channel: string,
 ) {
-  await this.otpService.verifyOtp(tenantId, phoneNumber, otp);
+  const tenantId = getTenantId();
 
+  // 1️⃣ Verify OTP (channel-agnostic)
+  await this.otpService.verifyOtp(
+    tenantId,
+    phoneNumber,
+    otp,
+  );
+
+  // 2️⃣ Session key (no channel tracking)
+  const sessionKey = `session:${tenantId}:${phoneNumber}`;
+
+  await redisClient.set(
+    sessionKey,
+    'ACTIVE',
+    'EX',
+    60 * 60 * 4,
+  );
+
+  // 3️⃣ Load user (tenant-safe)
   let user = await this.userRepo.findOne({
-    where: { tenantId, phoneNumber },
+    where: { phoneNumber },
   });
 
   if (!user) {
-    user = this.userRepo.create({ tenantId, phoneNumber });
+    user = this.userRepo.createForTenant({ phoneNumber });
     await this.userRepo.save(user);
 
     await this.userRoleRepo.save(
@@ -69,26 +113,14 @@ async verifyOtp(
     throw new UnauthorizedException('User has no active role');
   }
 
-  const sessionKey = `session:${tenantId}:${phoneNumber}`;
-  const existingChannel = await redisClient.get(sessionKey);
-
-  if (existingChannel && existingChannel !== channel) {
-    throw new UnauthorizedException('User already logged in on another device');
-  }
-
-  await redisClient.set(sessionKey, channel, 'EX', 60 * 60 * 4);
-
+  // 4️⃣ Issue JWT
   return {
     accessToken: this.jwtService.sign({
       sub: user.id,
       tenantId,
       phoneNumber,
       role: userRole.role,
-      channel,
     }),
   };
 }
-
-
-
 }

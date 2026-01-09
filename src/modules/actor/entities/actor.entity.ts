@@ -1,4 +1,4 @@
-import {
+import { Index, Unique, 
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 
 @Entity('actors')
+@Index(['tenantId'])
 export class ActorEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

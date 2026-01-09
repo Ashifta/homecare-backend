@@ -6,8 +6,5 @@ export class VerifyOtpDto {
 
   @IsString()
   otp!: string;
-
-  @IsString()
-  channel!: string;   // ✅ REQUIRED
 }
 
