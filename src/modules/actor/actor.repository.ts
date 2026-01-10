@@ -26,7 +26,7 @@ export class ActorRepository extends BaseTenantRepository<ActorEntity> {
   async createCentral(tenantId: string): Promise<ActorEntity> {
     const central = this.create({
       tenantId,
-      type: 'CENTRAL',
+      type: 'TENANT_ADMIN',
       subType: 'CENTRAL_OPERATOR',
     });
     return this.save(central);

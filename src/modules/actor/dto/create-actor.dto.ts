@@ -5,8 +5,8 @@ export class CreateActorDto {
   @IsNotEmpty()
   tenantId!: string;
 
-  @IsEnum(['RECEIVER', 'PROVIDER', 'CENTRAL'])
-  type!: 'RECEIVER' | 'PROVIDER' | 'CENTRAL';
+  @IsEnum(['RECEIVER', 'PROVIDER', 'TENANT_ADMIN'])
+  type!: 'RECEIVER' | 'PROVIDER' | 'TENANT_ADMIN';
 
   @IsNotEmpty()
   subType!: string;

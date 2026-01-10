@@ -37,6 +37,7 @@ async validate(payload: {
   phoneNumber: string;
   role: Role;
 }) {
+   console.log(payload);
   const { sub, tenantId, phoneNumber, role } = payload;
   if (!sub || !tenantId || !phoneNumber || !role) {
     throw new UnauthorizedException('Invalid JWT payload');

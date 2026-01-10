@@ -30,7 +30,7 @@ export class OutcomeService {
   }
 
   async reviewOutcome(id: string, role: string) {
-    if (role !== 'CENTRAL') throw new ForbiddenException();
+    if (role !== 'TENANT_ADMIN') throw new ForbiddenException();
     const outcome = this.outcomes.find(o => o.id === id);
     if (!outcome) throw new Error('Outcome not found');
     outcome.reviewed = true;

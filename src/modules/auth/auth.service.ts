@@ -27,12 +27,11 @@ export class AuthService {
   ) {}
 
 async sendOtp(phoneNumber: string) {
-  const tenantId = getTenantId();
+
 
   try {
     // 1️⃣ Try WhatsApp first
     await this.otpService.sendOtp(
-      tenantId,
       phoneNumber,
       'WHATSAPP',
     );
@@ -45,7 +44,6 @@ async sendOtp(phoneNumber: string) {
   } catch (err) {
     // 2️⃣ Fallback to SMS
     await this.otpService.sendOtp(
-      tenantId,
       phoneNumber,
       'SMS',
     );
@@ -59,21 +57,27 @@ async sendOtp(phoneNumber: string) {
 }
 
 
-  async verifyOtp(
+ async verifyOtp(
   phoneNumber: string,
   otp: string,
 ) {
+  console.log('[verifyOtp] START', { phoneNumber });
+
   const tenantId = getTenantId();
+  console.log('[verifyOtp] tenantId resolved', { tenantId });
 
   // 1️⃣ Verify OTP (channel-agnostic)
+  console.log('[verifyOtp] verifying OTP');
   await this.otpService.verifyOtp(
     tenantId,
     phoneNumber,
     otp,
   );
+  console.log('[verifyOtp] OTP verified');
 
   // 2️⃣ Session key (no channel tracking)
   const sessionKey = `session:${tenantId}:${phoneNumber}`;
+  console.log('[verifyOtp] setting session key', { sessionKey });
 
   await redisClient.set(
     sessionKey,
@@ -83,13 +87,21 @@ async sendOtp(phoneNumber: string) {
   );
 
   // 3️⃣ Load user (tenant-safe)
+  console.log('[verifyOtp] loading user');
   let user = await this.userRepo.findOne({
     where: { phoneNumber },
   });
 
   if (!user) {
+    console.log('[verifyOtp] user not found, creating new user');
+
     user = this.userRepo.createForTenant({ phoneNumber });
     await this.userRepo.save(user);
+
+    console.log('[verifyOtp] assigning RECEIVER role', {
+      userId: user.id,
+      tenantId,
+    });
 
     await this.userRoleRepo.save(
       this.userRoleRepo.create({
@@ -99,6 +111,8 @@ async sendOtp(phoneNumber: string) {
         isActive: true,
       }),
     );
+  } else {
+    console.log('[verifyOtp] existing user found', { userId: user.id });
   }
 
   const userRole = await this.userRoleRepo.findOne({
@@ -110,17 +124,30 @@ async sendOtp(phoneNumber: string) {
   });
 
   if (!userRole) {
+    console.error('[verifyOtp] NO ACTIVE ROLE', {
+      userId: user.id,
+      tenantId,
+    });
     throw new UnauthorizedException('User has no active role');
   }
 
+  console.log('[verifyOtp] role resolved', {
+    role: userRole.role,
+  });
+
   // 4️⃣ Issue JWT
+  const payload = {
+    sub: user.id,
+    tenantId,
+    phoneNumber,
+    role: userRole.role,
+  };
+
+  console.log('[verifyOtp] issuing JWT', payload);
+
   return {
-    accessToken: this.jwtService.sign({
-      sub: user.id,
-      tenantId,
-      phoneNumber,
-      role: userRole.role,
-    }),
+    accessToken: this.jwtService.sign(payload),
   };
 }
+
 }

@@ -11,7 +11,6 @@ export class OtpService {
   ) {}
 
   async sendOtp(
-    tenantId: string,
     phoneNumber: string,
     channel: 'SMS' | 'WHATSAPP',
   ): Promise<void> {
@@ -19,7 +18,7 @@ export class OtpService {
     console.log(otp)
 
     await redisClient.set(
-      `otp:${tenantId}:${phoneNumber}`,
+      `otp:${'login'}:${phoneNumber}`,
       otp,
       'EX',
       300,

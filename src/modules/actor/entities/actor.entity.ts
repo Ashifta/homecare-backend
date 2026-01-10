@@ -15,7 +15,7 @@ export class ActorEntity {
   tenantId!: string;
 
   @Column({ type: 'varchar' })
-  type!: 'RECEIVER' | 'PROVIDER' | 'CENTRAL';
+  type!: 'RECEIVER' | 'PROVIDER' | 'TENANT_ADMIN';
 
   @Column()
   subType!: string;

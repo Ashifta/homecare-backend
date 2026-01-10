@@ -19,7 +19,7 @@ export class AppointmentController {
 
   // 2️⃣ Approve appointment
   @Post(':id/approve')
-  @Roles(Role.CENTRAL)
+  @Roles(Role.TENANT_ADMIN)
   async approve(@Param('id') id: string) {
     return this.appointmentService.approveAppointment(id);
   }
@@ -35,7 +35,7 @@ export class AppointmentController {
 
   // 4️⃣ ✅ Select FundSource (CENTRAL / FINANCE only)
   @Post(':id/select-fundsource')
-  @Roles(Role.CENTRAL, Role.FINANCE)
+  @Roles(Role.TENANT_ADMIN)
   async selectFundSource(
     @Param('id') id: string,
     @Body() dto: SelectFundSourceDto,
